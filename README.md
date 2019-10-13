@@ -1,25 +1,23 @@
 # TFFRCNN ON INDIAN PEDESTRIAN DATASET
 
-This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly based on the work of [CharlesShang](https://github.com/CharlesShang/TFFRCNN) I have re-organized the libraries under `lib` path, making each of python modules independent to each other, so you can understand, re-write the code easily.
+This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly for Pedestrian Detection on Indian Roads based on the work of [CharlesShang](https://github.com/CharlesShang/TFFRCNN).
 
-For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/pdf/1506.01497v3.pdf) by Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun.
+This repo is forked from [CharlesShang/TFFRCNN](https://github.com/CharlesShang/TFFRCNN) and changed were made on the top of it. For more details about this code please refer to the code [here](https://github.com/CharlesShang/TFFRCNN)
+
+I have parameterized the Anchor Aspect ratio and anchor scales, so that you can change and experiment with them. I have added the support for **Indian Pedestrian Dataset** Support. 
+
+
 
 ### What's New
-
-- [x] Resnet networks support
-- [x] KITTI object detection dataset support
-- [x] **P**osition **S**ensitive **ROI Pooling** (psroi_pooling), not testing yet
-- [x] Hard Example Mining
-- [x] Data Augment
-- [x] PVANet
-- [x] Tensorflow 1.0
----
 - [x] Change aspect ratios by parameter
 - [x] India Dataset Support Added
 
 ### Acknowledgments: 
 
 - [TFRRCNN](https://github.com/CharlesShang/TFFRCNN)
+
+
+For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/pdf/1506.01497v3.pdf) by Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun.
 
 
 ### Requirements: software

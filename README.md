@@ -38,8 +38,10 @@ For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Ti
 
 1. Clone the Faster R-CNN repository
   ```Shell
-  git clone https://github.com/mayankb2103/TFFRCNN.git
-  ```
+  git clone https://github.com/mayankb2103/FasterRCNN_India-Pedestrian.git
+  mv <DOWNLAOD_PATH>/FasterRCNN-India-Pedestrian <DOWNLAOD_PATH>TFFRCNN
+
+```
 
 2. Build the Cython modules
     ```Shell

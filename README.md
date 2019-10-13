@@ -1,6 +1,6 @@
-# TFFRCNN
+# TFFRCNN ON INDIAN DATASET
 
-This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly based on the work of [smallcorgi](https://github.com/smallcorgi/Faster-RCNN_TF) and [rbgirshick](https://github.com/rbgirshick/py-faster-rcnn). I have re-organized the libraries under `lib` path, making each of python modules independent to each other, so you can understand, re-write the code easily.
+This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly based on the work of [CharlesShang](https://github.com/CharlesShang/TFFRCNN) I have re-organized the libraries under `lib` path, making each of python modules independent to each other, so you can understand, re-write the code easily.
 
 For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/pdf/1506.01497v3.pdf) by Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun.
 
@@ -13,17 +13,16 @@ For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Ti
 - [x] Data Augment
 - [x] PVANet
 - [x] Tensorflow 1.0
+- [x] Change aspect ratio by parameter
+- [x] India Dataset Support Added
 - [ ] R-FCN
 - [ ] Multi-layer Architecture (HyperNet)
 - [ ] more hacks...
 
 ### Acknowledgments: 
 
-1. [py-faster-rcnn](https://github.com/rbgirshick/py-faster-rcnn)
+- [TFRRCNN](https://github.com/CharlesShang/TFFRCNN)
 
-2. [Faster-RCNN_TF](https://github.com/smallcorgi/Faster-RCNN_TF)
-
-3. [ROI pooling](https://github.com/zplizzi/tensorflow-fast-rcnn)
 
 ### Requirements: software
 
@@ -39,7 +38,7 @@ For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Ti
 
 1. Clone the Faster R-CNN repository
   ```Shell
-  git clone https://github.com/CharlesShang/TFFRCNN.git
+  git clone https://github.com/mayankb2103/TFFRCNN.git
   ```
 
 2. Build the Cython modules

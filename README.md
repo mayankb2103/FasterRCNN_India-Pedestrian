@@ -1,4 +1,4 @@
-# TFFRCNN ON INDIAN DATASET
+# TFFRCNN ON INDIAN PEDESTRIAN DATASET
 
 This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly based on the work of [CharlesShang](https://github.com/CharlesShang/TFFRCNN) I have re-organized the libraries under `lib` path, making each of python modules independent to each other, so you can understand, re-write the code easily.
 

@@ -1,12 +1,10 @@
 # TFFRCNN ON INDIAN PEDESTRIAN DATASET
 
-This is an experimental **T**ensor **F**low implementation of **F**aster **RCNN** (**TFFRCNN**), mainly for Pedestrian Detection on Indian Roads based on the work of [CharlesShang](https://github.com/CharlesShang/TFFRCNN).
+This is an experimental implementation of FasterRCNN object detection method mainly for *Pedestrian Detection on Indian Roads*.
 
-This repo is forked from [CharlesShang/TFFRCNN](https://github.com/CharlesShang/TFFRCNN) and changed were made on the top of it. For more details about this code please refer to the code [here](https://github.com/CharlesShang/TFFRCNN)
+This repo is forked from [CharlesShang/TFFRCNN](https://github.com/CharlesShang/TFFRCNN) and changed were made on the top of it. For more details about this code please refer [here](https://github.com/CharlesShang/TFFRCNN)
 
 I have parameterized the Anchor Aspect ratio and anchor scales, so that you can change and experiment with them. I have added the support for **Indian Pedestrian Dataset** Support. 
-
-
 
 ### What's New
 - [x] Change aspect ratios by parameter

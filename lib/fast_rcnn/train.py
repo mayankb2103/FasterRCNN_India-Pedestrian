@@ -127,6 +127,7 @@ class SolverWrapper(object):
         # optimizer
         if cfg.TRAIN.SOLVER == 'Adam':
             opt = tf.train.AdamOptimizer(cfg.TRAIN.LEARNING_RATE)
+            lr = tf.Variable(cfg.TRAIN.LEARNING_RATE, trainable=False)
         elif cfg.TRAIN.SOLVER == 'RMS':
             opt = tf.train.RMSPropOptimizer(cfg.TRAIN.LEARNING_RATE)
         else:

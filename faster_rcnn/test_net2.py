@@ -20,6 +20,48 @@ import argparse
 import pprint
 import time
 import tensorflow as tf
+def vis_detections(im, class_name, dets, fig,ax, image_name,arr,thresh=0.5):
+    """Draw detected bounding boxes."""
+    inds = np.where(dets[:, -1] >= thresh)[0]
+    tmplst=image_name.split("/")
+    tstimg="/".join(tmplst[:5])+"/Results/"+"/".join(tmplst[7:-1])+"/Images/"+tmplst[-1]
+    
+    if len(inds) == 0:
+        plt.axis('off')
+    	plt.tight_layout()
+	fig.savefig(tstimg)
+        return
+    
+    for i in inds:
+	tmpr=np.append([class_name],dets[i])
+	
+	arr=np.append(arr,tmpr)
+	
+        bbox = dets[i, :4]
+        score = dets[i, -1]
+
+        ax.add_patch(
+            plt.Rectangle((bbox[0], bbox[1]),
+                          bbox[2] - bbox[0],
+                          bbox[3] - bbox[1], fill=False,
+                          edgecolor='red', linewidth=3.5)
+        )
+        ax.text(bbox[0], bbox[1] - 2,
+                '{:s} {:.3f}'.format(class_name, score),
+                bbox=dict(facecolor='blue', alpha=0.5),
+                fontsize=14, color='white')
+
+    ax.set_title(('{} detections with '
+                  'p({} | box) >= {:.1f}').format(class_name, class_name,
+                                                  thresh),
+                 fontsize=14)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.draw()
+    fig.savefig(tstimg)
+    
+    #print arr
+    return arr
 
 def parse_args():
     """
@@ -47,9 +89,6 @@ def parse_args():
     parser.add_argument('--network', dest='network_name',
                         help='name of the network',
                         default=None, type=str)
-    parser.add_argument('--test_file', dest='result_path',
-                        help='Path of the test file',
-                        default=None)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -61,15 +100,14 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    #print('Called with args:')
+    print('Called with args:')
+    print(args)
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
-    print '================================================='
-    print "Dataset Loading for  testing is: ",args.imdb_name
-    #print('Using config:')
-    #pprint.pprint(cfg)
 
+    print('Using config:')
+    pprint.pprint(cfg)
 
     while not os.path.exists(args.model) and args.wait:
         print('Waiting for {} to exist...'.format(args.model))
@@ -79,9 +117,9 @@ if __name__ == '__main__':
 
     imdb = get_imdb(args.imdb_name)
     imdb.competition_mode(args.comp_mode)
-    imdb.test_fpath(args.result_path)
-    #device_name = '/gpu:{:d}'.format(args.gpu_id)
-    #print device_name
+
+    device_name = '/gpu:{:d}'.format(args.gpu_id)
+    print device_name
 
     network = get_network(args.network_name)
     print 'Use network `{:s}` in training'.format(args.network_name)
@@ -94,11 +132,8 @@ if __name__ == '__main__':
     latest_checkpoint=tf.train.latest_checkpoint(args.model)
     if latest_checkpoint is not None:
 	saver.restore(sess,latest_checkpoint)
-    flpath=args.model+"/checkpoint"
-    print 'Loading model weights from', 
-    #print open(flpath,'r').readline().split(':')[-1]
-    print '================================================='
+	
     #saver.restore(sess, args.model)
-#    print ('Loading model weights from {:s}').format(args.model)
+    print ('Loading model weights from {:s}').format(args.model)
 
     test_net(sess, network, imdb, weights_filename)

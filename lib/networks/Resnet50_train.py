@@ -29,7 +29,12 @@ class Resnet50_train(Network):
         n_classes = cfg.NCLASSES
         # anchor_scales = [8, 16, 32]
         anchor_scales = cfg.ANCHOR_SCALES
+	print "Num of anchor scales:",len(anchor_scales)
+	asp_ratios=cfg.AS_RATIOS
+	nratios=len(asp_ratios)
+	print "Num of aspect ratios:",nratios	
         _feat_stride = [16, ]
+
         (self.feed('data')
              .conv(7, 7, 64, 2, 2, relu=False, name='conv1')
              .batch_normalization(relu=True, name='bn_conv1', is_training=False)
@@ -195,14 +200,14 @@ class Resnet50_train(Network):
         #========= RPN ============
         (self.feed('res4f_relu')
              .conv(3,3,512,1,1,name='rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*2 ,1 , 1, padding='VALID', relu = False, name='rpn_cls_score'))
+             .conv(1,1,len(anchor_scales)*len(asp_ratios)*2 ,1 , 1, padding='VALID', relu = False, name='rpn_cls_score'))
   
         (self.feed('rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info')
-             .anchor_target_layer(_feat_stride, anchor_scales, name = 'rpn-data' ))
+             .anchor_target_layer(_feat_stride, anchor_scales,asp_ratios, name = 'rpn-data' ))
         # Loss of rpn_cls & rpn_boxes
 
         (self.feed('rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*4, 1, 1, padding='VALID', relu = False, name='rpn_bbox_pred'))
+             .conv(1,1,len(anchor_scales)*len(asp_ratios)*4, 1, 1, padding='VALID', relu = False, name='rpn_bbox_pred'))
 
         #========= RoI Proposal ============
         (self.feed('rpn_cls_score')
@@ -210,10 +215,10 @@ class Resnet50_train(Network):
              .spatial_softmax(name='rpn_cls_prob'))
 
         (self.feed('rpn_cls_prob')
-             .spatial_reshape_layer(len(anchor_scales)*3*2, name = 'rpn_cls_prob_reshape'))
+             .spatial_reshape_layer(len(anchor_scales)*len(asp_ratios)*2, name = 'rpn_cls_prob_reshape'))
 
         (self.feed('rpn_cls_prob_reshape','rpn_bbox_pred','im_info')
-             .proposal_layer(_feat_stride, anchor_scales, 'TRAIN',name = 'rpn_rois'))
+             .proposal_layer(_feat_stride, anchor_scales,asp_ratios, 'TRAIN',name = 'rpn_rois'))
 
         (self.feed('rpn_rois','gt_boxes', 'gt_ishard', 'dontcare_areas')
              .proposal_target_layer(n_classes,name = 'roi-data'))
@@ -241,7 +246,7 @@ class Resnet50_train(Network):
              .batch_normalization(relu=True, name='bn5b_branch2b',is_training=False)
              .conv(1, 1, 2048, 1, 1, biased=False, relu=False, name='res5b_branch2c')
              .batch_normalization(name='bn5b_branch2c',is_training=False,relu=False))
-        #pdb.set_trace()
+
         (self.feed('res5a_relu', 
                    'bn5b_branch2c')
              .add(name='res5b')
@@ -252,7 +257,7 @@ class Resnet50_train(Network):
              .batch_normalization(relu=True, name='bn5c_branch2b',is_training=False)
              .conv(1, 1, 2048, 1, 1, biased=False, relu=False, name='res5c_branch2c')
              .batch_normalization(name='bn5c_branch2c',is_training=False,relu=False))
-        #pdb.set_trace()
+
         (self.feed('res5b_relu',
         	       'bn5c_branch2c')
              .add(name='res5c')

@@ -21,7 +21,7 @@ from ..fast_rcnn.bbox_transform import bbox_transform
 
 DEBUG = False
 
-def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_info, _feat_stride = [16,], anchor_scales = [4 ,8, 16, 32]):
+def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_info, _feat_stride = [16,], anchor_scales = [4 ,8, 16, 32], aspect_ratios = [0.5,1,2]):
     """
     Assign anchors to ground-truth targets. Produces anchor classification
     labels and bounding-box regression targets.
@@ -44,8 +44,10 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     rpn_bbox_outside_weights: (HxWxA, 4) used to balance the fg/bg,
                             beacuse the numbers of bgs and fgs mays significiantly different
     """
-    _anchors = generate_anchors(scales=np.array(anchor_scales))
+    _anchors = generate_anchors(scales=np.array(anchor_scales),ratios=np.array(aspect_ratios))
+	
     _num_anchors = _anchors.shape[0]
+
 
     if DEBUG:
         print 'anchors:'

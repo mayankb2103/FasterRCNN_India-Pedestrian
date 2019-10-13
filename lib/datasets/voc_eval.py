@@ -3,12 +3,13 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Bharath Hariharan
 # --------------------------------------------------------
-
+import matplotlib.pyplot as plt
 import xml.etree.ElementTree as ET
 import os
 import cPickle
 import numpy as np
 import pdb
+import cv2
 def parse_rec(filename):
     """ Parse a PASCAL VOC xml file """
     tree = ET.parse(filename)
@@ -20,12 +21,11 @@ def parse_rec(filename):
         obj_struct['truncated'] = int(obj.find('truncated').text)
         obj_struct['difficult'] = int(obj.find('difficult').text)
         bbox = obj.find('bndbox')
-        obj_struct['bbox'] = [int(bbox.find('xmin').text),
-                              int(bbox.find('ymin').text),
-                              int(bbox.find('xmax').text),
-                              int(bbox.find('ymax').text)]
+        obj_struct['bbox'] = [int(float(bbox.find('xmin').text)),
+                              int(float(bbox.find('ymin').text)),
+                              int(float(bbox.find('xmax').text)),
+                              int(float(bbox.find('ymax').text))]
         objects.append(obj_struct)
-
     return objects
 
 def voc_ap(rec, prec, use_07_metric=False):
@@ -66,6 +66,7 @@ def voc_eval(detpath,
              imagesetfile,
              classname,
              cachedir,
+	     resdir,
              ovthresh=0.5,
              use_07_metric=False):
     """rec, prec, ap = voc_eval(detpath,
@@ -111,6 +112,7 @@ def voc_eval(detpath,
                 print 'Reading annotation for {:d}/{:d}'.format(
                     i + 1, len(imagenames))
         # save
+
         print 'Saving cached annotations to {:s}'.format(cachefile)
         with open(cachefile, 'w') as f:
             cPickle.dump(recs, f)
@@ -132,10 +134,12 @@ def voc_eval(detpath,
                                  'difficult': difficult,
                                  'det': det}
 
+
     # read dets
     detfile = detpath.format(classname)
     with open(detfile, 'r') as f:
         lines = f.readlines()
+
     if any(lines) == 1:
 
         splitlines = [x.strip().split(' ') for x in lines]
@@ -148,11 +152,12 @@ def voc_eval(detpath,
         sorted_scores = np.sort(-confidence)
         BB = BB[sorted_ind, :]
         image_ids = [image_ids[x] for x in sorted_ind]
-
+	
         # go down dets and mark TPs and FPs
         nd = len(image_ids)
         tp = np.zeros(nd)
         fp = np.zeros(nd)
+	fn = np.zeros(nd)
         for d in range(nd):
             R = class_recs[image_ids[d]]
             bb = BB[d, :].astype(float)
@@ -190,11 +195,23 @@ def voc_eval(detpath,
                 fp[d] = 1.
 
         # compute precision recall
+	
         fp = np.cumsum(fp)
         tp = np.cumsum(tp)
+        dct={'tp':tp,'fp':fp,'nim':len(imagenames),'npos':float(npos)}
         rec = tp / float(npos)
+	mr=1.0-rec
+	plt.plot((fp/len(imagenames)),mr) 
+	plt.yscale('log',basey=10)
+	plt.xscale('log',basex=10)
+	plt.savefig('./cal_plt')
+	resfilename=str(len(imagenames))+".txt"
+	resfile=os.path.join(resdir,resfilename)
+	with open(resfile, 'w') as f:
+        	cPickle.dump(dct, f)
         # avoid divide by zero in case the first detection matches a difficult
         # ground truth
+	
         prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
         ap = voc_ap(rec, prec, use_07_metric)
     else:

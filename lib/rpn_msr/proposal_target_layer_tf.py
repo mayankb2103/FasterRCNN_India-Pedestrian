@@ -93,6 +93,7 @@ def proposal_target_layer(rpn_rois, gt_boxes, gt_ishard, dontcare_areas, _num_cl
     rois = rois.reshape(-1, 5)
     labels = labels.reshape(-1, 1)
     bbox_targets = bbox_targets.reshape(-1, _num_classes*4)
+
     bbox_inside_weights = bbox_inside_weights.reshape(-1, _num_classes*4)
 
     bbox_outside_weights = np.array(bbox_inside_weights > 0).astype(np.float32)

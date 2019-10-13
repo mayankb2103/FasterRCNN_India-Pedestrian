@@ -39,6 +39,7 @@ def get_minibatch(roidb, num_classes):
         assert len(im_scales) == 1, "Single batch only"
         assert len(roidb) == 1, "Single batch only"
         # gt boxes: (x1, y1, x2, y2, cls)
+
         gt_inds = np.where(roidb[0]['gt_classes'] != 0)[0]
         gt_boxes = np.empty((len(gt_inds), 5), dtype=np.float32)
         gt_boxes[:, 0:4] = roidb[0]['boxes'][gt_inds, :] * im_scales[0]
@@ -119,7 +120,7 @@ def _sample_rois(roidb, fg_rois_per_image, rois_per_image, num_classes):
     bg_rois_per_this_image = rois_per_image - fg_rois_per_this_image
     bg_rois_per_this_image = np.minimum(bg_rois_per_this_image,
                                         bg_inds.size)
-    # Sample foreground regions without replacement
+    # Sample background regions without replacement
     if bg_inds.size > 0:
         bg_inds = npr.choice(
                 bg_inds, size=bg_rois_per_this_image, replace=False)

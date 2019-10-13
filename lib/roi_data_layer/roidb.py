@@ -95,12 +95,12 @@ def add_bbox_regression_targets(roidb):
         assert np.min(stds) < 0.01, \
             'Boxes std is too small, std:{}'.format(stds)
 
-    print 'bbox target means:'
-    print means
-    print means[1:, :].mean(axis=0) # ignore bg class
-    print 'bbox target stdevs:'
-    print stds
-    print stds[1:, :].mean(axis=0) # ignore bg class
+   # print 'bbox target means:'
+   # print means
+   # print means[1:, :].mean(axis=0) # ignore bg class
+   # print 'bbox target stdevs:'
+   # print stds
+   # print stds[1:, :].mean(axis=0) # ignore bg class
 
     # Normalize targets
     if cfg.TRAIN.BBOX_NORMALIZE_TARGETS:

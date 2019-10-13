@@ -22,6 +22,9 @@ class Resnet50_test(Network):
     def setup(self):
         n_classes = cfg.NCLASSES
         anchor_scales = cfg.ANCHOR_SCALES
+	asp_ratios=cfg.AS_RATIOS
+	nratios=len(asp_ratios)
+	print "Num of aspect ratios:",nratios
         _feat_stride = [16, ]
 
 
@@ -190,22 +193,21 @@ class Resnet50_test(Network):
         #========= RPN ============
         (self.feed('res4f_relu')
              .conv(3,3,512,1,1,name='rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*2 ,1 , 1, padding='VALID', relu = False, name='rpn_cls_score'))
-
+             .conv(1,1,len(anchor_scales)*len(asp_ratios)*2 ,1 , 1, padding='VALID', relu = False, name='rpn_cls_score'))
 
         (self.feed('rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*4, 1, 1, padding='VALID', relu = False, name='rpn_bbox_pred'))
+             .conv(1,1,len(anchor_scales)*len(asp_ratios)*4, 1, 1, padding='VALID', relu = False, name='rpn_bbox_pred'))
 
         #========= RoI Proposal ============
         (self.feed('rpn_cls_score')
-             .spatial_reshape_layer(2,name = 'rpn_cls_score_reshape')
+             .spatial_reshape_layer(2, name = 'rpn_cls_score_reshape')
              .spatial_softmax(name='rpn_cls_prob'))
 
         (self.feed('rpn_cls_prob')
-             .spatial_reshape_layer(len(anchor_scales)*3*2,name = 'rpn_cls_prob_reshape'))
+             .spatial_reshape_layer(len(anchor_scales)*len(asp_ratios)*2, name = 'rpn_cls_prob_reshape'))
 
         (self.feed('rpn_cls_prob_reshape','rpn_bbox_pred','im_info')
-             .proposal_layer(_feat_stride, anchor_scales, 'TEST',name = 'rois'))
+             .proposal_layer(_feat_stride, anchor_scales,asp_ratios, 'TRAIN',name = 'rois'))
 
         #========= RCNN ============        
         (self.feed('res4f_relu','rois')

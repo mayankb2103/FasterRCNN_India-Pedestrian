@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 import xml.dom.minidom as minidom
-
+import csv
 import os
 import PIL
 import numpy as np
@@ -23,16 +23,15 @@ from .imdb import imdb
 from .imdb import ROOT_DIR
 import ds_utils
 from .voc_eval import voc_eval
-
 # TODO: make fast_rcnn irrelevant
 # >>>> obsolete, because it depends on sth outside of this project
 from ..fast_rcnn.config import cfg
 # <<<< obsolete
 
 
-class kittivoc(imdb):
+class CaltechVOC(imdb):
     def __init__(self, image_set, devkit_path=None):
-        imdb.__init__(self, 'kittivoc_' + image_set)
+        imdb.__init__(self, 'CaltechVOC_' + image_set)
         self._image_set = image_set
         self._devkit_path = self._get_default_path() if devkit_path is None \
                             else devkit_path
@@ -48,6 +47,7 @@ class kittivoc(imdb):
         self._roidb_handler = self.gt_roidb
         self._salt = str(uuid.uuid4())
         self._comp_id = 'comp4'
+	self.test_filepath=''
         self._year = ''
         # PASCAL specific config options
         self.config = {'cleanup'     : True,
@@ -97,10 +97,9 @@ class kittivoc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join(cfg.DATA_DIR, 'KITTIVOC')
+        return os.path.join(cfg.DATA_DIR, 'CaltechVOC')
 
     def gt_roidb(self):
-	
         """
         Return the database of ground-truth regions of interest, aka, the annotations.
 
@@ -202,7 +201,6 @@ class kittivoc(imdb):
                     int(obj.find('difficult').text) == 0 and obj.find('name').text.lower().strip() == 'pedestrian']
             num_objs = len(non_diff_objs)
             if num_objs == 0:
-                print index,
                 self._image_index.pop(i)
         print 'Done. '
 
@@ -280,6 +278,7 @@ class kittivoc(imdb):
         comp_id = (self._comp_id + '_' + self._salt if self.config['use_salt']
             else self._comp_id)
         return comp_id
+    
 
     def _get_voc_results_file_template(self):
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
@@ -295,7 +294,8 @@ class kittivoc(imdb):
             if cls == '__background__':
                 continue
             print 'Writing {} VOC results file'.format(cls)
-            filename = self._get_voc_results_file_template().format(cls)
+            filename = self.test_filepath
+	    print(filename)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -309,6 +309,14 @@ class kittivoc(imdb):
                                    dets[k, 2] + 1, dets[k, 3] + 1))
 
     def _do_python_eval(self, output_dir = 'output'):
+	print output_dir
+	mera_dataset='CaltechVOC'
+	flname='./TFFRCNN/output/faster_rcnn_caltech/VGG_new/CaltechVOC_train/checkpoint'
+	frstlne=open(flname, 'r').readline()
+	itr=frstlne.split(".ckpt")[0].split("_")[-1]
+	csvpath='./TFFRCNN/ECCV_result/caltech/tmp.csv'
+
+	
         annopath = os.path.join(
             self._devkit_path,
             'Annotations', '{:s}.xml')
@@ -317,6 +325,9 @@ class kittivoc(imdb):
             'ImageSets', 'Main',
             self._image_set + '.txt')
         cachedir = os.path.join(self._devkit_path, 'annotations_cache')
+	resdir=os.path.join(self._devkit_path,'results')
+	if not os.path.exists(resdir):
+		os.makedirs(resdir)
         aps = []
         # The PASCAL VOC metric changed in 2010
         use_07_metric = False
@@ -327,26 +338,22 @@ class kittivoc(imdb):
             if cls == '__background__':
                 continue
             filename = self._get_voc_results_file_template().format(cls)
-            rec, prec, ap = voc_eval(filename, annopath, imagesetfile, cls, cachedir,
+            rec, prec, ap = voc_eval(filename, annopath, imagesetfile, cls, cachedir,resdir,
                                      ovthresh=0.5, use_07_metric = use_07_metric)
             aps += [ap]
             print('AP for {} = {:.4f}'.format(cls, ap))
             with open(os.path.join(output_dir, cls + '_pr.pkl'), 'w') as f:
                 cPickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
+	    with open(csvpath,'a') as fd:
+		writer=csv.writer(fd)
+		writer.writerow([itr, np.round(np.mean(aps),3)])
         print('Mean AP = {:.4f}'.format(np.mean(aps)))
         print('~~~~~~~~')
-        print('Results:')
         for ap in aps:
             print('{:.3f}'.format(ap))
         print('{:.3f}'.format(np.mean(aps)))
+
         print('~~~~~~~~')
-        print('')
-        print('--------------------------------------------------------------')
-        print('Results computed with the **unofficial** Python eval code.')
-        print('Results should be very close to the official MATLAB eval code.')
-        print('Recompute with `./tools/reval.py --matlab ...` for your paper.')
-        print('-- Thanks, The Management')
-        print('--------------------------------------------------------------')
 
     def _do_matlab_eval(self, output_dir='output'):
         print '-----------------------------------------------------'
@@ -377,14 +384,17 @@ class kittivoc(imdb):
                 os.remove(filename)
 
     def competition_mode(self, on):
+
         if on:
             self.config['use_salt'] = False
             self.config['cleanup'] = False
         else:
             self.config['use_salt'] = True
             self.config['cleanup'] = True
-
+    def test_fpath(self,test_path):
+	self.test_filepath=test_path
+   
 if __name__ == '__main__':
-    d = kittivoc('trainval')
+    d = CaltechVOC('trainval')
     res = d.roidb
     from IPython import embed; embed()

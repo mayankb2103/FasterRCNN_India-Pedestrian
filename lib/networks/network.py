@@ -94,6 +94,7 @@ class Network(object):
         return '%s_%d'%(prefix, id)
 
     def make_var(self, name, shape, initializer=None, trainable=True, regularizer=None):
+		
         return tf.get_variable(name, shape, initializer=initializer, trainable=trainable, regularizer=regularizer)
 
     def validate_padding(self, padding):
@@ -227,7 +228,7 @@ class Network(object):
         if isinstance(input[1], tuple):
             input[1] = input[1][0]
 
-        print input
+        
         return roi_pool_op.roi_pool(input[0], input[1],
                                     pooled_height,
                                     pooled_width,
@@ -251,18 +252,20 @@ class Network(object):
                                            name=name)[0]
 
     @layer
-    def proposal_layer(self, input, _feat_stride, anchor_scales, cfg_key, name):
+    
+    def proposal_layer(self, input, _feat_stride, anchor_scales, ratios,cfg_key, name):
         if isinstance(input[0], tuple):
             input[0] = input[0][0]
             # input[0] shape is (1, H, W, Ax2)
             # rpn_rois <- (1 x H x W x A, 5) [0, x1, y1, x2, y2]
+        
         return tf.reshape(tf.py_func(proposal_layer_py,\
-                                     [input[0],input[1],input[2], cfg_key, _feat_stride, anchor_scales],\
+                                     [input[0],input[1],input[2], cfg_key, _feat_stride, anchor_scales,ratios],\
                                      [tf.float32]),
                           [-1,5],name =name)
 
     @layer
-    def anchor_target_layer(self, input, _feat_stride, anchor_scales, name):
+    def anchor_target_layer(self, input, _feat_stride, anchor_scales,ratios, name):
         if isinstance(input[0], tuple):
             input[0] = input[0][0]
 
@@ -270,7 +273,7 @@ class Network(object):
             # 'rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info'
             rpn_labels,rpn_bbox_targets,rpn_bbox_inside_weights,rpn_bbox_outside_weights = \
                 tf.py_func(anchor_target_layer_py,
-                           [input[0],input[1],input[2],input[3],input[4], _feat_stride, anchor_scales],
+                           [input[0],input[1],input[2],input[3],input[4], _feat_stride, anchor_scales,ratios],
                            [tf.float32,tf.float32,tf.float32,tf.float32])
 
             rpn_labels = tf.convert_to_tensor(tf.cast(rpn_labels,tf.int32), name = 'rpn_labels') # shape is (1 x H x W x A, 2)

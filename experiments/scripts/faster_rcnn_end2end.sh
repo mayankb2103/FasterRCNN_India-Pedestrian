@@ -33,6 +33,7 @@ case $DATASET in
   kittivoc)
     TRAIN_IMDB="kittivoc_train"
     ITERS=100000
+    TEST_IMDB="kittivoc_test"
     CFG="experiments/cfgs/faster_rcnn_kitti.yml"
     ;;
   coco)

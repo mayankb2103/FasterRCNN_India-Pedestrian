@@ -23,7 +23,7 @@ DEBUG = False
 Outputs object detection proposals by applying estimated bounding-box
 transformations to a set of regular boxes (called "anchors").
 """
-def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_stride = [16,], anchor_scales = [8, 16, 32]):
+def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_stride = [16,], anchor_scales = [8, 16, 32],aspect_ratios=[0,5,1,2]):
     """
     Parameters
     ----------
@@ -54,15 +54,19 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     #layer_params = yaml.load(self.param_str_)
 
     """
-    _anchors = generate_anchors(scales=np.array(anchor_scales))
+    	
+    _anchors = generate_anchors(scales=np.array(anchor_scales),ratios=np.array(aspect_ratios))
+
     _num_anchors = _anchors.shape[0]
+
+    
     # rpn_cls_prob_reshape = np.transpose(rpn_cls_prob_reshape,[0,3,1,2]) #-> (1 , 2xA, H , W)
     # rpn_bbox_pred = np.transpose(rpn_bbox_pred,[0,3,1,2])              # -> (1 , Ax4, H , W)
 
     #rpn_cls_prob_reshape = np.transpose(np.reshape(rpn_cls_prob_reshape,[1,rpn_cls_prob_reshape.shape[0],rpn_cls_prob_reshape.shape[1],rpn_cls_prob_reshape.shape[2]]),[0,3,2,1])
     #rpn_bbox_pred = np.transpose(rpn_bbox_pred,[0,3,2,1])
     im_info = im_info[0]
-
+    
     assert rpn_cls_prob_reshape.shape[0] == 1, \
         'Only single item batches are supported'
     # cfg_key = str(self.phase) # either 'TRAIN' or 'TEST'
@@ -77,9 +81,10 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # the first set of _num_anchors channels are bg probs
     # the second set are the fg probs, which we want
     # (1, H, W, A)
+   
     scores = np.reshape(np.reshape(rpn_cls_prob_reshape, [1, height, width, _num_anchors, 2])[:,:,:,:,1],
                         [1, height, width, _num_anchors])
-
+    
     # TODO: NOTICE: the old version is ordered by (1, H, W, 2, A) !!!!
     # TODO: if you use the old trained model, VGGnet_fast_rcnn_iter_70000.ckpt, uncomment this line
     # scores = rpn_cls_prob_reshape[:,:,:,_num_anchors:]
@@ -109,7 +114,9 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # shift anchors (K, A, 4)
     # reshape to (K*A, 4) shifted anchors
     A = _num_anchors
+
     K = shifts.shape[0]
+
     anchors = _anchors.reshape((1, A, 4)) + \
               shifts.reshape((1, K, 4)).transpose((1, 0, 2))
     anchors = anchors.reshape((K * A, 4))

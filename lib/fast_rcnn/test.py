@@ -262,6 +262,7 @@ def test_net(sess, net, imdb, weights_filename , max_per_image=300, thresh=0.05,
     # all detections are collected into:
     #    all_boxes[cls][image] = N x 5 array of detections in
     #    (x1, y1, x2, y2, score)
+
     all_boxes = [[[] for _ in xrange(num_images)]
                  for _ in xrange(imdb.num_classes)]
 
@@ -273,9 +274,9 @@ def test_net(sess, net, imdb, weights_filename , max_per_image=300, thresh=0.05,
         roidb = imdb.roidb
 
     det_file = os.path.join(output_dir, 'detections.pkl')
-    # if os.path.exists(det_file):
-    #     with open(det_file, 'rb') as f:
-    #         all_boxes = cPickle.load(f)
+    if os.path.exists(det_file):
+         with open(det_file, 'rb') as f:
+             all_boxes = cPickle.load(f)
 
     for i in xrange(num_images):
         # filter out any ground truth boxes
@@ -302,8 +303,10 @@ def test_net(sess, net, imdb, weights_filename , max_per_image=300, thresh=0.05,
 
         # skip j = 0, because it's the background class
         for j in xrange(1, imdb.num_classes):
+
             inds = np.where(scores[:, j] > thresh)[0]
             cls_scores = scores[inds, j]
+	
             cls_boxes = boxes[inds, j*4:(j+1)*4]
             cls_dets = np.hstack((cls_boxes, cls_scores[:, np.newaxis])) \
                 .astype(np.float32, copy=False)

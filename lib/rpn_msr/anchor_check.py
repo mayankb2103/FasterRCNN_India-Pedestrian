@@ -4,9 +4,9 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ross Girshick and Sean Bell
 # --------------------------------------------------------
-
+import cv2
 import numpy as np
-
+np.set_printoptions(precision=3)
 # Verify that we compute the same anchors as Shaoqing's matlab implementation:
 #
 #    >> load output/rpn_cachedir/faster_rcnn_VOC2007_ZF_stage1_rpn/anchors.mat
@@ -34,14 +34,12 @@ import numpy as np
 #       [ -79., -167.,   96.,  184.],
 #       [-167., -343.,  184.,  360.]])
 
-def generate_anchors(base_size=16, ratios=[2,3,4],
-                     scales=1.4*np.array([1.15,2,3,4,5,6,7])):
-	
+def generate_anchors(base_size=16, ratios=[0.49, 3.78],
+                     scales=1*np.array([2.7, 16.17])):
     """
     Generate anchor (reference) windows by enumerating aspect ratios X
     scales wrt a reference (0, 0, 15, 15) window.
     """
-	
 
     base_anchor = np.array([1, 1, base_size, base_size]) - 1
     ratio_anchors = _ratio_enum(base_anchor, ratios)
@@ -101,8 +99,31 @@ def _scale_enum(anchor, scales):
 if __name__ == '__main__':
     import time
     t = time.time()
-    a = generate_anchors()
-    print(a)
-#    print time.time() - t
+    ratios=[0.49, 3.78]
+    scales=1.*np.array([2.7, 16.17])
+    r,s=len(ratios),len(scales)	
+    a = generate_anchors(ratios=ratios)
 
-    from IPython import embed; embed()
+    img = np.ones((480,640,3), np.uint8)
+    img*=240
+    k=0
+    dct={0:(0,0,255),1:(0,255,0),2:(255,0,255)}
+    w=a[:,2]-a[:,0]
+    h=a[:,3]-a[:,1]
+    asp=w/h
+   # print w,h
+   # print a
+    
+    for j in a:
+    	tmp=0
+
+		
+#		print "==========","For aspect ratios:",ratios[tmp],"=================="
+	#print j,
+	cv2.rectangle(img,(int(j[0])+200,int(j[1])+200),(int(j[2])+200,int(j[3])+200),dct[tmp],1)
+	width=np.round(j[2]-j[0],3)
+        height=np.round(j[3]-j[1],3)
+	tmp+=1
+	print width,height, round(width/height,3)
+    cv2.imwrite('frame2.jpg',img)
+    #from IPython import embed; embed()

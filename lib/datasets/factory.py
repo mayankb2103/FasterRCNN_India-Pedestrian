@@ -18,6 +18,8 @@ from .kitti_tracking import kitti_tracking
 from .nthu import nthu
 from .coco import coco
 from .kittivoc import kittivoc
+from .CaltechVOC import CaltechVOC
+from .India import India
 
 def _selective_search_IJCV_top_k(split, year, top_k):
     """Return an imdb that uses the top k proposals from the selective search
@@ -39,8 +41,8 @@ for year in ['2007', '2012', '0712']:
 # Set up kittivoc
     for split in ['train', 'val', 'trainval', 'test']:
         name = 'kittivoc_{}'.format(split)
-        print name
         __sets[name] = (lambda split=split: kittivoc(split))
+
 
 # # KITTI dataset
 # for split in ['train', 'val', 'trainval', 'test']:
@@ -53,6 +55,21 @@ for year in ['2014']:
     for split in ['train', 'val', 'minival', 'valminusminival']:
         name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: coco(split, year))
+# Set up Indian_2017_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'Indian_{}'.format(split)
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'India_{}'.format(split)
+
+        __sets[name] = (lambda split=split: India(split))
+
+# Set up caltechvoc_2017_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'CaltechVOC_{}'.format(split)
+        __sets[name] = (lambda split=split: CaltechVOC(split))
 
 # Set up coco_2015_<split>
 for year in ['2015']:
@@ -63,16 +80,18 @@ for year in ['2015']:
 # NTHU dataset
 for split in ['71', '370']:
     name = 'nthu_{}'.format(split)
-    print name
     __sets[name] = (lambda split=split: nthu(split))
 
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
     if not __sets.has_key(name):
-        print (list_imdbs())
+        #print (list_imdbs())
         raise KeyError('Unknown dataset: {}'.format(name))
     return __sets[name]()
+
+# Set up Indian
+
 
 def list_imdbs():
     """List all registered imdbs."""

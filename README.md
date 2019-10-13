@@ -13,11 +13,9 @@ For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Ti
 - [x] Data Augment
 - [x] PVANet
 - [x] Tensorflow 1.0
-- [x] Change aspect ratio by parameter
+---
+- [x] Change aspect ratios by parameter
 - [x] India Dataset Support Added
-- [ ] R-FCN
-- [ ] Multi-layer Architecture (HyperNet)
-- [ ] more hacks...
 
 ### Acknowledgments: 
 
